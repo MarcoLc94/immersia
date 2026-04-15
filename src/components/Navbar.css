@@ -1,0 +1,69 @@
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2.5rem;
+    height: 64px;
+    border-bottom: 1px solid transparent;
+    background: transparent;
+    transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.navbar--scrolled {
+    border-bottom-color: rgba(0, 0, 0, 0.12);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+}
+
+.navbar__logo {
+    font-family: 'Arial', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #111;
+    text-transform: uppercase;
+    cursor: default;
+    user-select: none;
+    opacity: 0;
+}
+
+.navbar__logo-lab {
+    font-size: 0.6em;
+    font-weight: 600;
+    color: #2563EB;
+    margin-left: 2px;
+    vertical-align: super;
+}
+
+.navbar__links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 2.5rem;
+}
+
+.navbar__links li {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.navbar__links li a {
+    font-family: 'Arial', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+    color: #111;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: opacity 0.2s;
+}
+
+.navbar__links li a:hover {
+    opacity: 0.6;
+}
