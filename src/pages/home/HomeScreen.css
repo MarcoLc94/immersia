@@ -1,0 +1,33 @@
+.home {
+    background: #f7f7f5;
+}
+
+.home__section {
+    height: 100vh;
+    position: relative;
+}
+
+.home__stage {
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+.statue-wrapper {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+    transform-origin: center center;
+}
+
+.statue-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+
+.home__section--alt {
+    height: 100vh;
+    background: #efefed;
+}

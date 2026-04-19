@@ -17,8 +17,12 @@ const Navbar = ({ animate = false }: Props) => {
         if (!logo || !items.length) return
         animatedRef.current = true
 
-        gsap.to(logo,  { opacity: 1, duration: 1.5, ease: 'power2.out' })
-        gsap.to(items, { opacity: 1, y: 0, duration: 1, ease: 'power3.out', stagger: 0.15 })
+        gsap.to(logo, { opacity: 1, duration: 1.5, ease: 'power2.out' })
+
+        gsap.set(items[1], { y: 20 })
+        gsap.set([items[0], items[2]], { y: -20 })
+
+        gsap.to(items, { opacity: 1, y: 0, duration: 1, ease: 'power3.out' })
     }, [animate])
 
     useEffect(() => {
