@@ -1,0 +1,67 @@
+/* Ocultar cursor nativo en toda la página */
+*, *::before, *::after {
+    cursor: none !important;
+}
+
+/* ── Dot — punto central, instantáneo ───────────────────────────────────────── */
+.cursor__dot {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 6px;
+    background: #f3f1ee;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    will-change: transform;
+}
+
+/* ── Ring — anillo exterior con lag ──────────────────────────────────────────── */
+.cursor__ring {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 32px;
+    height: 32px;
+    border: 1.5px solid rgba(0, 119, 238, 0.7);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    will-change: transform;
+}
+
+/* Líneas de cruz dentro del ring */
+.cursor__ring::before,
+.cursor__ring::after {
+    content: '';
+    position: absolute;
+    background: rgba(0, 119, 238, 0.4);
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.cursor__ring::before {
+    width: 1px;
+    height: 10px;
+}
+
+.cursor__ring::after {
+    width: 10px;
+    height: 1px;
+}
+
+/* Ocultar en touch devices */
+@media (hover: none) and (pointer: coarse) {
+    .cursor__dot,
+    .cursor__ring {
+        display: none;
+    }
+
+    *, *::before, *::after {
+        cursor: auto !important;
+    }
+}

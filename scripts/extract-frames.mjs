@@ -34,10 +34,11 @@ const filter = [
     `colorkey=color=0x000000:similarity=${SIMILARITY}:blend=${BLEND}`,
 ].join(',')
 
-const cmd = `"${ffmpegPath}" -y -i "${input}" -vf "${filter}" -pix_fmt rgba "${pattern}"`
+const ffmpeg = ffmpegPath.replace(/"/g, '')
+const cmd = `"${ffmpeg}" -y -i "${input}" -vf "${filter}" -pix_fmt rgba "${pattern}"`
 
 console.log('🎬 Extrayendo frames con colorkey negro...')
-execSync(cmd, { stdio: 'inherit' })
+execSync(cmd, { stdio: 'inherit', shell: true })
 
 const count = readdirSync(outDir).filter(f => f.endsWith('.png')).length
 

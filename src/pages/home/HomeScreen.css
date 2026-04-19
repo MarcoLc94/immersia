@@ -1,33 +1,325 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=DM+Sans:wght@300;400;500&display=swap');
+
+/* ── Root ────────────────────────────────────────────────────────────────────── */
 .home {
-    background: #f7f7f5;
-}
-
-.home__section {
-    height: 100vh;
     position: relative;
+    width: 100%;
+    overflow-x: hidden;
+    background: #000000;
 }
 
-.home__stage {
-    height: 100vh;
+/* ── Parallax stage ──────────────────────────────────────────────────────────── */
+.parallax-stage {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
     overflow: hidden;
-    position: relative;
 }
 
-.statue-wrapper {
+.p-el {
+    position: absolute;
+    opacity: 0;
+    /* GSAP fades in */
+    will-change: transform;
+}
+
+/* Orbital ring — large, top-right behind statue */
+.p-el--1 {
+    width: 580px;
+    height: 580px;
+    top: -120px;
+    right: -60px;
+}
+
+/* Grid dots — bottom left */
+.p-el--2 {
+    width: 200px;
+    height: 160px;
+    bottom: 120px;
+    left: 60px;
+}
+
+/* Wave lines — center-right mid */
+.p-el--3 {
+    width: 520px;
+    height: 100px;
+    top: 52%;
+    right: 4%;
+    transform: translateY(-50%);
+}
+
+/* Diamond — upper left area */
+.p-el--4 {
+    width: 140px;
+    height: 140px;
+    top: 14%;
+    left: 38%;
+}
+
+/* Scan lines — right edge */
+.p-el--5 {
+    width: 240px;
+    height: 100px;
+    bottom: 22%;
+    right: 8%;
+}
+
+/* Cross target — lower center */
+.p-el--6 {
+    width: 90px;
+    height: 90px;
+    bottom: 30%;
+    left: 46%;
+}
+
+/* Arc fragment — upper right */
+.p-el--7 {
+    width: 180px;
+    height: 180px;
+    top: 8%;
+    right: 28%;
+}
+
+/* ── Hero section ────────────────────────────────────────────────────────────── */
+.home__hero {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* ── Frame animation canvas — full-hero background ───────────────────────────── */
+.statue-canvas {
     position: absolute;
     inset: 0;
-    will-change: transform;
-    transform-origin: center center;
-}
-
-.statue-canvas {
     width: 100%;
     height: 100%;
+    pointer-events: none;
+    opacity: 0;
+    /* GSAP fades in on entry */
+    z-index: 3;
+}
+
+/* ── Hero text — left side ───────────────────────────────────────────────────── */
+.hero-text {
+    position: relative;
+    padding-left: 72px;
+    padding-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 560px;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.hero-eyebrow {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    color: #0077EE;
+    text-transform: uppercase;
+    opacity: 0;
+    position: relative;
+    z-index: 5;
+    align-self: flex-start;
+    background: rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(6px);
+    padding: 6px 14px;
+    border-radius: 100px;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.9);
+    /* GSAP */
+}
+
+.hero-headline {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(64px, 7vw, 108px);
+    font-weight: 600;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    color: #f3f1ee;
+    position: relative;
+    z-index: 5;
+    filter:
+        drop-shadow(0 4px 32px rgba(0, 0, 0, 1)) drop-shadow(0 2px 12px rgba(0, 0, 0, 1)) drop-shadow(0 1px 4px rgba(0, 0, 0, 1));
+}
+
+.hero-hl-line {
     display: block;
+    overflow: hidden;
+    /* clip-path reveal needs this */
+    opacity: 0;
+    /* GSAP */
+}
+
+.hero-hl-line--em {
+    font-style: italic;
+    font-weight: 300;
+    color: #0055CC;
+}
+
+.hero-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.75;
+    color: rgba(243, 241, 238, 0.9);
+    opacity: 0;
+    position: relative;
+    z-index: 5;
+    filter:
+        drop-shadow(0 4px 32px rgba(0, 0, 0, 1)) drop-shadow(0 2px 12px rgba(0, 0, 0, 1)) drop-shadow(0 1px 4px rgba(0, 0, 0, 1));
+    /* GSAP */
+}
+
+/* ── CTA row ──────────────────────────────────────────────────────────────────── */
+.hero-cta-wrap {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    opacity: 0;
+    position: relative;
+    z-index: 5;
+    /* GSAP */
+}
+
+.hero-btn-primary {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 3.5px;
+    text-transform: uppercase;
+    padding: 15px 30px;
+    background: #f3f1ee;
+    color: #0d0d10;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.15s ease;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+
+.hero-btn-primary:hover {
+    background: #0055CC;
+    transform: translateY(-2px);
+}
+
+.hero-btn-secondary {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: rgba(243, 241, 238, 0.9);
+    background: rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(6px);
+    border: none;
+    border-bottom: 1px solid rgba(243, 241, 238, 0.2);
+    padding: 6px 14px 5px;
+    border-radius: 100px;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.9);
+}
+
+.hero-btn-secondary:hover {
+    color: #f3f1ee;
+    border-color: rgba(243, 241, 238, 0.6);
+    background: rgba(0, 0, 0, 0.38);
+}
+
+/* ── Scroll hint ─────────────────────────────────────────────────────────────── */
+.hero-scroll-hint {
+    position: absolute;
+    bottom: 36px;
+    left: 72px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    z-index: 5;
+    /* GSAP */
+}
+
+.scroll-line {
+    width: 36px;
+    height: 1px;
+    background: rgba(243, 241, 238, 0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+.scroll-line::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 120, 220, 0.6);
+    animation: scroll-tick 2.2s ease-in-out infinite;
+}
+
+@keyframes scroll-tick {
+    0% {
+        left: -100%;
+    }
+
+    50% {
+        left: 100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
+
+.hero-scroll-hint span {
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: rgba(243, 241, 238, 0.3);
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.9);
 }
 
 
-.home__section--alt {
-    height: 100vh;
-    background: #efefed;
+/* ── Responsive ──────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .hero-text {
+        padding-left: 28px;
+        padding-right: 28px;
+        max-width: 100%;
+        justify-content: flex-end;
+        padding-bottom: 100px;
+        margin-top: 0;
+    }
+
+    .hero-headline {
+        font-size: clamp(48px, 12vw, 72px);
+    }
+
+    .statue-canvas {
+        opacity: 0.45;
+    }
+
+    .hero-scroll-hint {
+        left: 28px;
+    }
+
+    .p-el--1 {
+        width: 300px;
+        height: 300px;
+        top: -60px;
+        right: -40px;
+    }
+
+    .p-el--3 {
+        display: none;
+    }
 }

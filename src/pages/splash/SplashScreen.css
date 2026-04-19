@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Cormorant+Garamond:ital,wght@1,300;1,400&display=swap');
 
+/* ── Container ──────────────────────────────────────────────────────────────── */
 .splash-container {
     position: relative;
     display: flex;
@@ -7,21 +8,103 @@
     align-items: center;
     height: 100vh;
     width: 100%;
-    background-color: #0d0d0d;
+    background-color: #000000;
     overflow: hidden;
 }
 
-/* Viñeta cinematográfica — shadow inset con blur grande, más marcado en esquinas */
-.splash-container::after {
-    content: '';
+/* ── Background layers ───────────────────────────────────────────────────────── */
+.splash-bg {
     position: absolute;
     inset: 0;
-    box-shadow: inset 0 0 320px rgba(0, 0, 0, 0.88);
     pointer-events: none;
-    z-index: 50;
 }
 
+/* Particle canvas */
+.splash-bg__particles {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.7;
+}
 
+/* Grid */
+.splash-bg__grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(0, 119, 238, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 119, 238, 0.06) 1px, transparent 1px);
+    background-size: 80px 80px;
+    animation: grid-fade-in 1s ease-out forwards;
+    opacity: 0;
+}
+
+@keyframes grid-fade-in {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Central ambient glow — GSAP animates opacity/scale */
+.splash-bg__glow {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 960px;
+    height: 580px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(ellipse at center,
+            rgba(0, 85, 204, 0.30) 0%,
+            rgba(0, 55, 170, 0.12) 45%,
+            transparent 75%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Energy burst — GSAP drives */
+.splash-bg__burst {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 700px;
+    height: 700px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle,
+            rgba(0, 119, 238, 0.45) 0%,
+            rgba(0, 85, 204, 0.20) 35%,
+            transparent 68%);
+    opacity: 0;
+    border-radius: 50%;
+}
+
+/* Scan line — GSAP moves top */
+.splash-bg__scan {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -4px;
+    height: 2px;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(0, 119, 238, 0.85),
+            rgba(243, 241, 238, 1),
+            rgba(0, 119, 238, 0.85),
+            transparent);
+    box-shadow: 0 0 18px 4px rgba(0, 119, 238, 0.5);
+    opacity: 0;
+}
+
+/* Vignette */
+.splash-bg__vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center,
+            transparent 28%,
+            rgba(0, 0, 0, 0.75) 100%);
+}
+
+/* ── Start overlay ───────────────────────────────────────────────────────────── */
 .start-overlay {
     position: absolute;
     inset: 0;
@@ -30,7 +113,7 @@
     justify-content: center;
     padding-bottom: 48px;
     cursor: pointer;
-    z-index: 60;
+    z-index: 10;
 }
 
 .timer-wrapper {
@@ -52,14 +135,13 @@
 
 .timer-ring__bg {
     fill: none;
-    stroke: rgba(255,255,255,0.08);
+    stroke: rgba(255, 255, 255, 0.07);
     stroke-width: 2;
 }
 
-/* circumference = 2 * π * 48 ≈ 302 */
 .timer-ring__progress {
     fill: none;
-    stroke: rgba(255,255,255,0.5);
+    stroke: rgba(0, 119, 238, 0.65);
     stroke-width: 2;
     stroke-linecap: round;
     stroke-dasharray: 302;
@@ -67,33 +149,69 @@
     animation: timer-fill 3s linear forwards;
 }
 
+/* Outer pulse ring */
+.timer-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0, 119, 238, 0.3);
+    animation: pulse-ring 2.2s ease-out infinite;
+}
+
 @keyframes timer-fill {
-    to { stroke-dashoffset: 0; }
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: scale(1);
+        opacity: 0.55;
+    }
+
+    70% {
+        transform: scale(1.38);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1.38);
+        opacity: 0;
+    }
 }
 
 .start-hint {
     font-family: 'Cormorant Garamond', serif;
     font-style: italic;
     font-size: 16px;
-    color: rgba(255,255,255,0.5);
+    color: rgba(243, 241, 238, 0.55);
     letter-spacing: 2px;
     text-align: center;
     line-height: 1.5;
-    animation: pulse 2s ease-in-out infinite;
+    animation: hint-pulse 2s ease-in-out infinite;
 }
 
-@keyframes pulse {
-    0%, 100% { opacity: 0.4; }
-    50%       { opacity: 1; }
+@keyframes hint-pulse {
+
+    0%,
+    100% {
+        opacity: 0.35;
+    }
+
+    50% {
+        opacity: 1;
+    }
 }
 
+/* ── Audio button ────────────────────────────────────────────────────────────── */
 .audio-btn {
     position: fixed;
     bottom: 24px;
     right: 24px;
-    z-index: 60;
     background: transparent;
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 1px solid rgba(0, 119, 238, 0.25);
     border-radius: 50%;
     width: 56px;
     height: 56px;
@@ -101,14 +219,22 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: rgba(255,255,255,0.5);
-    transition: color 0.2s, border-color 0.2s;
+    color: rgba(0, 119, 238, 0.55);
+    transition: color 180ms ease-out, border-color 180ms ease-out, transform 120ms ease-out;
     padding: 12px;
+    z-index: 20;
+    will-change: transform;
 }
 
-.audio-btn:hover {
-    color: white;
-    border-color: rgba(255,255,255,0.6);
+@media (hover: hover) and (pointer: fine) {
+    .audio-btn:hover {
+        color: #0077EE;
+        border-color: rgba(0, 119, 238, 0.7);
+    }
+}
+
+.audio-btn:active {
+    transform: scale(0.93);
 }
 
 .audio-btn svg {
@@ -116,9 +242,10 @@
     height: 100%;
 }
 
+/* ── Logo ────────────────────────────────────────────────────────────────────── */
 .splash-content {
     position: relative;
-    z-index: 60;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -134,18 +261,126 @@
     margin: 0;
 }
 
-.slogan {
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-weight: 300;
-    font-size: 38px;
-    color: #aaa;
-    letter-spacing: 12px;
-    margin: 0;
-    white-space: nowrap;
+/* ── Letter states ───────────────────────────────────────────────────────────── */
+
+.letter {
+    display: inline-block;
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 1.5px rgba(0, 119, 238, 0.85);
+    will-change: transform, opacity;
 }
 
-/* ── Mobile (todos) ──────────────────────────────── */
+.lab {
+    display: inline-block;
+    font-family: 'Arial', sans-serif;
+    font-size: 0.52em;
+    font-weight: 600;
+    color: #0077EE;
+    align-self: flex-end;
+    padding-bottom: 0.12em;
+    opacity: 0;
+    /* GSAP animates */
+}
+
+/* Idle wave (before click) */
+.letter--wave {
+    animation: wave 1.8s ease-in-out infinite;
+}
+
+@keyframes wave {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Filled — blue gradient pan */
+.letter--filled {
+    background: linear-gradient(90deg,
+            #0055CC, #0077EE, #00CFFF, #0077EE, #0055CC);
+    background-size: 700px 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-stroke: 0px transparent;
+    animation: gradient-pan 4s linear infinite;
+}
+
+@keyframes gradient-pan {
+    0% {
+        background-position: 0px 50%;
+    }
+
+    100% {
+        background-position: 700px 50%;
+    }
+}
+
+/* ── Typewriter slogan ───────────────────────────────────────────────────────── */
+.slogan {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 18px;
+    font-weight: 400;
+    color: rgba(243, 241, 238, 0.65);
+    letter-spacing: 6px;
+    margin: 0;
+    margin-top: 8px;
+    white-space: nowrap;
+    text-transform: uppercase;
+}
+
+.slogan-char {
+    display: inline-block;
+    transition: opacity 80ms ease-out;
+}
+
+.slogan-cursor {
+    display: inline-block;
+    color: rgba(0, 119, 238, 0.9);
+    animation: cursor-blink 0.6s step-end infinite;
+    margin-left: 2px;
+}
+
+@keyframes cursor-blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .letter--wave,
+    .letter--filled,
+    .splash-bg__grid,
+    .timer-ring__progress,
+    .timer-wrapper::after,
+    .start-hint,
+    .slogan-cursor {
+        animation: none;
+    }
+
+    .letter--filled {
+        background: linear-gradient(90deg, #0077EE, #0055CC);
+        -webkit-background-clip: text;
+        background-clip: text;
+    }
+
+    .slogan-char {
+        transition: none;
+    }
+}
+
+/* ── Mobile ──────────────────────────────────────────────────────────────────── */
 @media (max-width: 414px) {
     .splash-content {
         gap: 6px;
@@ -161,52 +396,28 @@
         justify-content: center;
     }
 
-
     .slogan {
-        font-size: clamp(11px, 3.2vw, 17px);
-        letter-spacing: clamp(1px, 1vw, 4px);
+        font-size: clamp(9px, 2.5vw, 14px);
+        letter-spacing: clamp(2px, 1vw, 5px);
         white-space: normal;
         text-align: center;
         width: 100%;
     }
 
-    .timer-wrapper   { width: clamp(80px, 24vw, 110px); height: clamp(80px, 24vw, 110px); }
-    .start-hint      { font-size: clamp(11px, 3vw, 14px); }
-    .audio-btn       { width: 44px; height: 44px; bottom: 16px; right: 16px; padding: 10px; }
-}
+    .timer-wrapper {
+        width: clamp(80px, 24vw, 110px);
+        height: clamp(80px, 24vw, 110px);
+    }
 
-/* Solo contorno, sin relleno */
-.letter {
-    display: inline-block;
-    -webkit-text-fill-color: transparent;
-    -webkit-text-stroke: 1.5px #8B5CFF;
-}
+    .start-hint {
+        font-size: clamp(11px, 3vw, 14px);
+    }
 
-.lab {
-    display: inline-block;
-    font-family: 'Arial', sans-serif;
-    font-size: 0.52em;
-    font-weight: 600;
-    color: #2563EB;
-    align-self: flex-end;
-    padding-bottom: 0.12em;
-}
-
-/* Animación de espera — ondulación suave */
-.letter--wave {
-    animation: wave 1.8s ease-in-out infinite;
-}
-
-@keyframes wave {
-    0%, 100% { transform: translateY(0px);   }
-    50%       { transform: translateY(-10px); }
-}
-
-/* Relleno con gradiente */
-.letter--filled {
-    background: linear-gradient(90deg, #8B5CFF, #4FD1FF, #C86BFF, #4FD1FF, #8B5CFF);
-    background-size: 700px 100%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-stroke: 0px transparent;
+    .audio-btn {
+        width: 44px;
+        height: 44px;
+        bottom: 16px;
+        right: 16px;
+        padding: 10px;
+    }
 }
