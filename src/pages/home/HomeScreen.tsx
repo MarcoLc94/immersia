@@ -107,7 +107,8 @@ const HomeScreen = ({ splashDone = false }: Props) => {
     const canvasRef     = useRef<HTMLCanvasElement>(null)
     const canvasOpacity = useRef(0)
     const framesRef     = useRef<HTMLImageElement[]>([])
-    const frameObjRef   = useRef({ frame: 0 })
+    const expFramesRef  = useRef<HTMLImageElement[]>([])
+    const phaseRef      = useRef<'intro'|'loop'>('intro')
     const frameTweenRef = useRef<gsap.core.Tween | null>(null)
 
     const heroTextRef  = useRef<HTMLDivElement>(null)
@@ -136,8 +137,9 @@ const HomeScreen = ({ splashDone = false }: Props) => {
             canvas.width  = canvas.offsetWidth  * window.devicePixelRatio
             canvas.height = canvas.offsetHeight * window.devicePixelRatio
             // Redraw current frame after resize
-            const idx = Math.round(frameObjRef.current.frame)
-            const img = framesRef.current[idx]
+            const idx = Math.round(frameIdxRef.current)
+            const arr = phaseRef.current === 'intro' ? expFramesRef.current : framesRef.current
+            const img = arr[idx]
             if (img?.complete && img.naturalWidth) {
                 const ctx = canvas.getContext('2d')
                 if (ctx) drawCover(ctx, img, canvas.width, canvas.height)
@@ -151,12 +153,18 @@ const HomeScreen = ({ splashDone = false }: Props) => {
     // ── Preload all frames ─────────────────────────────────────────────────────
     useEffect(() => {
         const imgs: HTMLImageElement[] = []
+        const expImgs: HTMLImageElement[] = []
         for (let i = 0; i < FRAME_COUNT; i++) {
             const img = new Image()
             img.src = `/frames/frame_${String(i + 1).padStart(4, '0')}.png`
             imgs.push(img)
+            
+            const expImg = new Image()
+            expImg.src = `/frames/greek-explosion/frame_${String(i + 1).padStart(4, '0')}.jpg`
+            expImgs.push(expImg)
         }
         framesRef.current = imgs
+        expFramesRef.current = expImgs
     }, [])
 
     // ── Mouse → SVG parallax ──────────────────────────────────────────────────
@@ -238,8 +246,9 @@ const HomeScreen = ({ splashDone = false }: Props) => {
         gsap.fromTo(canvas, { opacity: 0 }, { opacity: 1, duration: 1.8, ease: 'power2.out' })
 
         // ── Draw helper ──────────────────────────────────────────────────────
-        const drawFrame = (idx: number) => {
-            const img = framesRef.current[Math.max(0, Math.min(FRAME_COUNT - 1, idx))]
+        const drawFrame = (idx: number, isIntro: boolean = false) => {
+            const arr = isIntro ? expFramesRef.current : framesRef.current
+            const img = arr[Math.max(0, Math.min(FRAME_COUNT - 1, idx))]
             if (!img?.complete || !img.naturalWidth) return
             const ctx = canvas.getContext('2d')
             if (ctx) drawCover(ctx, img, canvas.width, canvas.height)
@@ -254,20 +263,46 @@ const HomeScreen = ({ splashDone = false }: Props) => {
             rafRef.current = requestAnimationFrame(tick)
             if (now - last < interval) return
             last = now
-            drawFrame(frameIdxRef.current)
-            frameIdxRef.current += directionRef.current
-            if (frameIdxRef.current >= FRAME_COUNT - 1) {
-                frameIdxRef.current = FRAME_COUNT - 1; directionRef.current = -1
-            } else if (frameIdxRef.current <= 0) {
-                frameIdxRef.current = 0; directionRef.current = 1
+            
+            if (phaseRef.current === 'intro') {
+                drawFrame(frameIdxRef.current, true)
+                frameIdxRef.current += directionRef.current
+                if (frameIdxRef.current <= 0) {
+                    phaseRef.current = 'loop'
+                    frameIdxRef.current = 0
+                    directionRef.current = 1
+                }
+            } else {
+                drawFrame(frameIdxRef.current, false)
+                frameIdxRef.current += directionRef.current
+                if (frameIdxRef.current >= FRAME_COUNT - 1) {
+                    frameIdxRef.current = FRAME_COUNT - 1; directionRef.current = -1
+                } else if (frameIdxRef.current <= 0) {
+                    frameIdxRef.current = 0; directionRef.current = 1
+                }
             }
         }
 
         const startLoop = () => {
             if (looping) return
             looping = true
-            frameIdxRef.current = 0
-            directionRef.current = 1
+            if (phaseRef.current === 'intro') {
+                frameIdxRef.current = 124 // Starts from frame_0125.jpg
+                directionRef.current = -1
+            } else {
+                frameIdxRef.current = 0
+                directionRef.current = 1
+            }
+            last = performance.now()
+            rafRef.current = requestAnimationFrame(tick)
+        }
+
+        const resumeLoopAt = (frame: number, dir: number) => {
+            if (looping) return
+            looping = true
+            phaseRef.current = 'loop'
+            frameIdxRef.current = frame
+            directionRef.current = dir
             last = performance.now()
             rafRef.current = requestAnimationFrame(tick)
         }
@@ -281,32 +316,55 @@ const HomeScreen = ({ splashDone = false }: Props) => {
 
         startLoop()
 
-        // ── Seek tween: loop → frame 18 al hacer scroll ─────────────────────
+        // ── Seek tween: al primer scroll, lleva frames desde donde estaba → 16 ─
         let seekTween: gsap.core.Tween | null = null
 
         const stFrames = ScrollTrigger.create({
             trigger: '.home__hero',
-            start: 'top top',
-            end: 'bottom top',
+            start: 'top top-=1',  // primer pixel de scroll real
             onEnter() {
+                if (seekTween) return
                 stopLoop()
-                seekTween?.kill()
-                const obj = { f: frameIdxRef.current }
+                const startFrame  = frameIdxRef.current
+                const capturedDir = directionRef.current
+
+                // Ocultar hero e iniciar TransitionCanvas al instante — sin espera
+                gsap.set(canvas, { opacity: 0 })
+                window.dispatchEvent(new CustomEvent('seek-start', {
+                    detail: { frame: startFrame, direction: capturedDir },
+                }))
+
+                // Mantener seekTween solo para sincronizar frameIdxRef (no dibuja)
+                const obj = { f: startFrame }
                 seekTween = gsap.to(obj, {
-                    f: 18,
-                    duration: 0.9,
+                    f: 16,
+                    duration: Math.max(0.25, (Math.abs(startFrame - 16) / FRAME_COUNT) * 1.5),
                     ease: 'power2.inOut',
-                    onUpdate() {
-                        frameIdxRef.current = Math.round(obj.f)
-                        drawFrame(frameIdxRef.current)
-                    },
+                    onUpdate() { frameIdxRef.current = Math.round(obj.f) },
+                    onComplete() { seekTween = null; frameIdxRef.current = 16 },
                 })
             },
             onLeaveBack() {
                 seekTween?.kill()
-                startLoop()
+                seekTween = null
+                // 1. Ocultar TransitionCanvas primero (sincrónico)
+                window.dispatchEvent(new CustomEvent('frame18-reset'))
+                // 2. Dibujar frame 16 en el hero canvas antes de mostrarlo
+                frameIdxRef.current = 16
+                drawFrame(16, false)
+                // 3. Mostrar hero canvas ya con el frame correcto
+                gsap.set(canvas, { opacity: 1 })
+                // 4. Reanudar loop (ya iniciado por hero-direction, o fallback)
+                if (!looping) startLoop()
             },
         })
+
+        // ── Recibe dirección de vuelta desde TransitionCanvas al hacer scroll up ─
+        const onHeroDirection = (e: Event) => {
+            const dir = (e as CustomEvent).detail?.direction ?? 1
+            resumeLoopAt(16, dir)
+        }
+        window.addEventListener('hero-direction', onHeroDirection)
 
         // ── Text exit/entry ScrollTrigger ────────────────────────────────────
         const stText = ScrollTrigger.create({
@@ -316,6 +374,7 @@ const HomeScreen = ({ splashDone = false }: Props) => {
             onLeave:     () => exitTlRef.current?.play(),
             onEnterBack: () => exitTlRef.current?.reverse(),
         })
+
 
         // Text entrance
         const t = setTimeout(() => entryTlRef.current?.play(), 500)
@@ -352,6 +411,7 @@ const HomeScreen = ({ splashDone = false }: Props) => {
             stopLoop()
             seekTween?.kill()
             stFrames.kill()
+            window.removeEventListener('hero-direction', onHeroDirection)
             stText.kill()
             wordCallRef.current?.kill()
         }

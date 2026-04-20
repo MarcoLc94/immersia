@@ -1,7 +1,7 @@
 /* ── Section ─────────────────────────────────────────────────────────────────── */
 .studio-section {
     position: relative;
-    background: #0d0d10;
+    z-index: 4;
     clip-path: polygon(0 5%, 100% 0, 100% 100%, 0 100%);
     margin-top: -5vh;
     padding: 14vh 72px 12vh;
